@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19 Chest X-Ray Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --light-bg: #f8fafc;
+            --white: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .main-card {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .card-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-header p {
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .upload-section {
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--light-bg);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.02);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.05);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 2rem;
+            padding: 2rem;
+            background: var(--light-bg);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .result-image {
+            text-align: center;
+        }
+
+        .result-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .result-details {
+            padding: 1rem;
+        }
+
+        .prediction-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+        }
+
+        .prediction-positive {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .prediction-negative {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .prediction-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .confidence-bar {
+            background: var(--border-color);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            transition: width 0.8s ease;
+            border-radius: 4px;
+        }
+
+        .confidence-positive {
+            background: var(--danger-color);
+        }
+
+        .confidence-negative {
+            background: var(--success-color);
+        }
+
+        .probabilities {
+            margin-top: 1rem;
+        }
+
+        .probability-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .probability-item:last-child {
+            border-bottom: none;
+        }
+
+        .disclaimer {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+            color: #856404;
+        }
+
+        .disclaimer strong {
+            color: #533208;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-lungs"></i> COVID-19 X-Ray Analyzer</h1>
+            <p>AI-powered chest X-ray analysis for COVID-19 detection</p>
+        </div>
+
+        <div class="main-card">
+            <div class="card-header">
+                <h2>Upload Chest X-Ray Image</h2>
+                <p>Upload a chest X-ray image for AI-powered COVID-19 analysis</p>
+            </div>
+            
+            <div class="card-body">
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">
+                            <strong>Click to upload</strong> or drag and drop your X-ray image here
+                        </div>
+                        <div class="upload-text">
+                            Supports: JPG, PNG, JPEG files
+                        </div>
+                        <input type="file" class="file-input" id="fileInput" accept="image/*">
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <button class="btn btn-primary" id="analyzeBtn" disabled>
+                            <i class="fas fa-microscope"></i>&nbsp; Analyze X-Ray
+                        </button>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Analyzing X-ray image...</p>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Our AI model is processing your image
+                    </p>
+                </div>
+
+                <div class="result-section" id="resultSection">
+                    <h3><i class="fas fa-chart-line"></i> Analysis Results</h3>
+                    
+                    <div class="result-grid">
+                        <div class="result-image">
+                            <h4>Uploaded X-Ray</h4>
+                            <img id="resultImage" src="" alt="Uploaded X-ray">
+                        </div>
+                        
+                        <div class="result-details">
+                            <div class="prediction-card" id="predictionCard">
+                                <div class="prediction-label" id="predictionLabel"></div>
+                                <div>Confidence: <span id="confidenceText"></span></div>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" id="confidenceFill"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="probabilities">
+                                <h4>Detailed Probabilities</h4>
+                                <div class="probability-item">
+                                    <span>Normal:</span>
+                                    <span id="normalProb"></span>
+                                </div>
+                                <div class="probability-item">
+                                    <span>COVID-19 Positive:</span>
+                                    <span id="covidProb"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="disclaimer">
+                    <p><strong><i class="fas fa-exclamation-triangle"></i> Medical Disclaimer:</strong> 
+                    This tool is for educational and research purposes only. The results should not be used as a substitute for professional medical diagnosis. Always consult with qualified healthcare professionals for medical decisions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const resultSection = document.getElementById('resultSection');
+        let selectedFile = null;
+
+        // Upload area interactions
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleDrop);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        fileInput.addEventListener('change', handleFileSelect);
+        analyzeBtn.addEventListener('click', analyzeImage);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        }
+
+        function handleFile(file) {
+            if (file && file.type.startsWith('image/')) {
+                selectedFile = file;
+                analyzeBtn.disabled = false;
+                
+                // Update upload area to show selected file
+                uploadArea.innerHTML = `
+                    <div class="upload-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <div class="upload-text">
+                        <strong>${file.name}</strong> selected
+                    </div>
+                    <div class="upload-text">
+                        Click to change or drag a new image
+                    </div>
+                `;
+            } else {
+                alert('Please select a valid image file (JPG, PNG, JPEG)');
+            }
+        }
+
+        async function analyzeImage() {
+            if (!selectedFile) return;
+
+            // Show loading
+            loading.style.display = 'block';
+            resultSection.style.display = 'none';
+            analyzeBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                displayResults(result);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred during analysis: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        function displayResults(result) {
+            // Display image
+            document.getElementById('resultImage').src = `data:image/jpeg;base64,${result.image}`;
+            
+            // Display prediction
+            const predictionCard = document.getElementById('predictionCard');
+            const predictionLabel = document.getElementById('predictionLabel');
+            const confidenceText = document.getElementById('confidenceText');
+            const confidenceFill = document.getElementById('confidenceFill');
+            
+            predictionLabel.textContent = result.prediction;
+            confidenceText.textContent = `${result.confidence}%`;
+            
+            // Style based on prediction
+            if (result.prediction === 'COVID-19 Positive') {
+                predictionCard.className = 'prediction-card prediction-positive';
+                confidenceFill.className = 'confidence-fill confidence-positive';
+            } else {
+                predictionCard.className = 'prediction-card prediction-negative';
+                confidenceFill.className = 'confidence-fill confidence-negative';
+            }
+            
+            confidenceFill.style.width = `${result.confidence}%`;
+            
+            // Display probabilities
+            document.getElementById('normalProb').textContent = `${result.probabilities.Normal}%`;
+            document.getElementById('covidProb').textContent = `${result.probabilities['COVID-19 Positive']}%`;
+            
+            // Show results with animation
+            resultSection.style.display = 'block';
+            resultSection.classList.add('fade-in');
+            
+            // Scroll to results
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Reset animation class after animation completes
+        resultSection.addEventListener('animationend', () => {
+            resultSection.classList.remove('fade-in');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env*/
+.venv*/
+
+# Flask specific
+instance/
+.migrations/
+
+# Logs
+*.log
+logs/
+
+# Databases
+*.sqlite3
+*.db
+
+# Model files
+*.pth
+*.pt
+*.ckpt
+
+# Data files
+*.csv
+*.tsv
+*.json
+*.xlsx
+*.db
+data/
+
+# IDE / editor settings
+.vscode/
+*.code-workspace
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build / distribution
+build/
+dist/
+*.egg-info/
